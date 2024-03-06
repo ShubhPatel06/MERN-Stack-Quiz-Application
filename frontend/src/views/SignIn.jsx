@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import PulseLoader from "react-spinners/PulseLoader";
 import { useLoginMutation } from "../features/auth/authApiSlice";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import icons from react-icons library
+import { setCredentials } from "../features/auth/authSlice";
+import { useDispatch } from "react-redux";
 
 const SignIn = () => {
   const userRef = useRef();
@@ -15,6 +17,7 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [login, { isLoading }] = useLoginMutation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     userRef.current.focus();
@@ -35,8 +38,8 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { accessToken } = await login(formData).unwrap();
-      dispatch(setCredentials({ accessToken }));
+      const { accessToken, userInfo } = await login(formData).unwrap();
+      dispatch(setCredentials({ accessToken, userInfo }));
       setFormData({ username: "", password: "" });
       navigate("/home");
     } catch (err) {
@@ -47,7 +50,7 @@ const SignIn = () => {
       } else if (err.status === 401) {
         setErrMsg(err.data.message);
       } else {
-        setErrMsg(err.data.message);
+        setErrMsg(err.data?.message);
       }
       errRef.current.focus();
     }

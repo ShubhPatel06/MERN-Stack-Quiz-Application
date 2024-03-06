@@ -44,6 +44,7 @@ export const signin = async (req, res, next) => {
     const accessToken = jwt.sign(
       {
         UserInfo: {
+          id: validUser._id,
           username: validUser.username,
         },
       },
@@ -59,10 +60,14 @@ export const signin = async (req, res, next) => {
       maxAge: 120 * 60 * 1000, //cookie expiry: set to match access token
     });
 
-    // Send accessToken containing username and roles
-    res
-      .status(200)
-      .json({ accessToken, UserInfo: { username: validUser.username } });
+    // Send username
+    res.json({
+      accessToken,
+      userInfo: {
+        username: validUser.username,
+        email: validUser.email,
+      },
+    });
   } catch (error) {
     next(error);
   }
