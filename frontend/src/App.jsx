@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import SignIn from "./views/SignIn";
 import SignUp from "./views/SignUp";
 import Home from "./views/Home";
+import CreateQuiz from "./views/CreateQuiz";
 
 function App() {
   return (
@@ -12,8 +13,9 @@ function App() {
       <Route path="/signup" element={<SignUp />} />
 
       {/* Protected Routes */}
-      <Route path="/home" element={<Layout />}>
-        <Route index element={<Home />} />
+      <Route element={<Layout />}>
+        <Route path="/home" element={<Home />} />
+        <Route path="/create-quiz" element={<CreateQuiz />} />
       </Route>
 
       {/* Redirect to login page for unknown routes */}
