@@ -1,4 +1,5 @@
 import { useState } from "react";
+import QuizQuestions from "../components/QuizQuestions";
 
 const CreateQuiz = () => {
   const [formData, setFormData] = useState({
@@ -9,13 +10,25 @@ const CreateQuiz = () => {
     startTime: "",
     endTime: "",
     password: "",
-    questions: [{ question: "", answers: ["", ""], correctAnswerIndex: null }],
+    questions: [],
   });
+
+  const onQuestionsUpdate = (questions) => {
+    setFormData({
+      ...formData,
+      questions,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(formData);
+  };
 
   return (
     <main className="p-3 mx-auto max-w-7xl">
       <h1 className="my-6 text-3xl font-semibold text-center">Create a Quiz</h1>
-      <form>
+      <form onSubmit={handleSubmit}>
         {/*Title*/}
         <div className="">
           <label htmlFor="title" className="text-lg font-medium text-gray-700">
@@ -179,12 +192,18 @@ const CreateQuiz = () => {
           </div>
         </div>
         <div className="mt-3">
-          <label
-            htmlFor="questions"
-            className="text-lg font-medium text-gray-700"
+          <QuizQuestions
+            questions={formData.questions}
+            onQuestionsUpdate={onQuestionsUpdate}
+          />
+        </div>
+        <div className="flex items-center justify-end mt-3 w-100">
+          <button
+            className="px-4 py-2 font-semibold text-white rounded-md bg-emerald-500 hover:bg-emerald-600 sm:px-6"
+            type="submit"
           >
-            Questions
-          </label>
+            Save
+          </button>
         </div>
       </form>
     </main>
