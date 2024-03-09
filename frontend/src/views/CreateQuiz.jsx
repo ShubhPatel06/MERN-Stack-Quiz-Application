@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import QuizQuestions from "../components/QuizQuestions";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useAddNewQuizMutation } from "../features/quiz/quizApiSlice";
+import { useNavigate } from "react-router-dom";
+import PulseLoader from "react-spinners/PulseLoader";
 
 const CreateQuiz = () => {
+  const [addNewQuiz, { isLoading, isSuccess, isError, error }] =
+    useAddNewQuizMutation();
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -13,6 +22,15 @@ const CreateQuiz = () => {
     questions: [],
   });
 
+  const [errMsg, setErrMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (isSuccess) {
+      navigate("/home");
+    }
+  }, [isSuccess, navigate]);
+
   const onQuestionsUpdate = (questions) => {
     setFormData({
       ...formData,
@@ -20,9 +38,54 @@ const CreateQuiz = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  // Add validation logic to ensure start and end times are within open and close dates
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const { opensOn, closesOn, startTime, endTime } = formData;
+
+    // Convert date and time strings to Date objects
+    const opensOnDate = new Date(opensOn);
+    const closesOnDate = new Date(closesOn);
+    const startTimeDate = new Date(`${opensOn}T${startTime}`);
+    const endTimeDate = new Date(`${opensOn}T${endTime}`);
+
+    // Check if start time is before end time
+    if (startTimeDate >= endTimeDate) {
+      setErrMsg("Start time must be before end time.");
+      return;
+    }
+
+    // Check if start time and end time are within open and close dates
+    if (startTimeDate < opensOnDate || endTimeDate > closesOnDate) {
+      setErrMsg("Start time and end time must be within open and close dates.");
+      return;
+    }
+
     console.log(formData);
+    try {
+      await addNewQuiz(formData);
+      setFormData({
+        title: "",
+        description: "",
+        opensOn: "",
+        closesOn: "",
+        startTime: "",
+        endTime: "",
+        password: "",
+        questions: [],
+      });
+    } catch (err) {
+      if (!err.status) {
+        setErrMsg("No Server Response");
+      } else if (err.status === 400) {
+        setErrMsg(err.data.message);
+      } else if (err.status === 401) {
+        setErrMsg(err.data.message);
+      } else {
+        setErrMsg(err.data.message);
+      }
+      errRef.current.focus();
+    }
   };
 
   return (
@@ -92,7 +155,8 @@ const CreateQuiz = () => {
                   opensOn: e.target.value,
                 })
               }
-              placeholder="Date"
+              placeholder="Opening Date"
+              min={new Date().toISOString().split("T")[0]}
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
@@ -115,7 +179,8 @@ const CreateQuiz = () => {
                   closesOn: e.target.value,
                 })
               }
-              placeholder="Date"
+              min={new Date().toISOString().split("T")[0]}
+              placeholder="Closing Date"
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
@@ -130,17 +195,18 @@ const CreateQuiz = () => {
               Start Time <span className="text-xs">(optional)</span>
             </label>
             <input
-              type="time"
-              name="startTime"
-              id="startTime"
+              type="datetime-local"
+              name={`startTime`}
+              id={`startTime`}
               value={formData.startTime}
-              onChange={(e) =>
+              onChange={(ev) =>
                 setFormData({
                   ...formData,
-                  startTime: e.target.value,
+                  startTime: ev.target.value,
                 })
               }
-              placeholder="Start Time"
+              min={formData.opensOn ? `${formData.opensOn}T00:00` : ""}
+              max={formData.closesOn ? `${formData.closesOn}T23:59` : ""}
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
@@ -153,42 +219,51 @@ const CreateQuiz = () => {
               End Time <span className="text-xs">(optional)</span>
             </label>
             <input
-              type="time"
-              name="endTime"
-              id="endTime"
+              type="datetime-local"
+              name={`endTime`}
+              id={`endTime`}
               value={formData.endTime}
-              onChange={(e) =>
+              onChange={(ev) =>
                 setFormData({
                   ...formData,
-                  endTime: e.target.value,
+                  endTime: ev.target.value,
                 })
               }
-              placeholder="End Time"
+              min={formData.opensOn ? `${formData.opensOn}T00:00` : ""}
+              max={formData.closesOn ? `${formData.closesOn}T23:59` : ""}
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
           {/* Password */}
           <div className="flex-1">
-            <label
-              htmlFor="password"
-              className="text-lg font-medium text-gray-700"
-            >
-              Password <span className="text-xs">(optional)</span>
-            </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  password: e.target.value,
-                })
-              }
-              placeholder="Password"
-              className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
-            />
+            <div className="relative">
+              <label
+                htmlFor="password"
+                className="text-lg font-medium text-gray-700"
+              >
+                Password <span className="text-xs">(optional)</span>
+              </label>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
+                id="password"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    password: e.target.value,
+                  })
+                }
+              />
+              <button
+                type="button"
+                className="absolute text-gray-400 transform -translate-y-1/2 top-2/3 right-2 focus:outline-none"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
         </div>
         <div className="mt-3">
@@ -202,10 +277,14 @@ const CreateQuiz = () => {
             className="px-4 py-2 font-semibold text-white rounded-md bg-emerald-500 hover:bg-emerald-600 sm:px-6"
             type="submit"
           >
-            Save
+            {isLoading ? <PulseLoader color={"#FFF"} /> : "Save"}
           </button>
         </div>
       </form>
+      <p className="p-1 mb-2 text-red-600">{errMsg}</p>
+      <p className="p-1 mb-2 text-center text-red-600">
+        {error?.data?.message}
+      </p>
     </main>
   );
 };

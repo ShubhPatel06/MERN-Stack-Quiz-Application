@@ -12,6 +12,7 @@ const QuizQuestions = ({ questions, onQuestionsUpdate }) => {
       id: uuidv4(),
       type: "text",
       question: "",
+      marks: "",
       data: {},
     });
     setMyQuestions([...myQuestions]);

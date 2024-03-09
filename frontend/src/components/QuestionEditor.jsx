@@ -42,39 +42,61 @@ export default function QuestionEditor({
   };
 
   const deleteOption = (op) => {
+    // Check if the deleted option was selected as a correct answer
+    const wasCorrectAnswer =
+      model.data.correctAnswer && model.data.correctAnswer.includes(op.text);
+
+    // Remove the option
     model.data.options = model.data.options.filter(
-      (option) => option.uuid != op.uuid
+      (option) => option.uuid !== op.uuid
     );
+
+    // If the deleted option was selected as a correct answer, remove it from the correctAnswer array
+    if (wasCorrectAnswer) {
+      model.data.correctAnswer = model.data.correctAnswer.filter(
+        (item) => item !== op.text
+      );
+    }
+
     setModel({ ...model });
   };
 
-  const handleCorrectAnswerChange = (ev) => {
+  const handleCorrectAnswerChange = (ev, option, questionIndex) => {
     const value = ev.target.value;
     const type = model.type;
     const newModel = { ...model };
 
-    // If the question type is select, radio, or checkbox
+    if (questionIndex !== index) {
+      return; // Ignore changes for other questions
+    }
+
     if (!newModel.data.correctAnswer) {
-      // If correctAnswer is not yet initialized, initialize it as an empty array
       newModel.data.correctAnswer = [];
     }
 
     if (type === "text") {
-      // If the question type is text, directly set the correct answer value
       newModel.data.correctAnswer = [value];
     } else {
       if (ev.target.checked) {
-        // If the option is checked, add its value to the correct answer array
-        newModel.data.correctAnswer.push(value);
-      } else {
-        // If the option is unchecked, remove its value from the correct answer array
-        const index = newModel.data.correctAnswer.indexOf(value);
-        if (index !== -1) {
-          newModel.data.correctAnswer.splice(index, 1);
+        if (type === "checkbox") {
+          // For checkbox type, add the value if it's not already present
+          if (!newModel.data.correctAnswer.includes(value)) {
+            newModel.data.correctAnswer.push(value);
+          }
+        } else {
+          // For radio buttons, only the selected value should be added
+          newModel.data.correctAnswer = [value];
         }
+      } else {
+        if (type === "checkbox") {
+          // For checkbox type, remove the value if it's present
+          newModel.data.correctAnswer = newModel.data.correctAnswer.filter(
+            (item) => item !== value
+          );
+        }
+        // For radio buttons, unchecking is not applicable, so no action is needed here
       }
     }
-    // Set the updated model
     setModel(newModel);
   };
 
@@ -113,18 +135,17 @@ export default function QuestionEditor({
           </div>
         </div>
         <div className="flex justify-between gap-3 mb-3">
-          {/* Question Text */}
           <div className="flex-grow">
             <label
-              htmlFor="question"
-              className="text-sm font-medium text-gray-700 "
+              htmlFor={`question-${index}`}
+              className="text-sm font-medium text-gray-700"
             >
               Question
             </label>
             <input
               type="text"
-              name="question"
-              id="question"
+              name={`question-${index}`}
+              id={`question-${index}`}
               value={model.question}
               onChange={(ev) =>
                 setModel({
@@ -135,19 +156,39 @@ export default function QuestionEditor({
               className="w-full px-3 py-1 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
-          {/* Question Text */}
-
-          {/* Question Type */}
+          <div className="flex justify-between gap-3 mb-3">
+            <div className="flex-grow">
+              <label
+                htmlFor={`marks-${index}`}
+                className="text-sm font-medium text-gray-700"
+              >
+                Marks
+              </label>
+              <input
+                type="number"
+                name={`marks-${index}`}
+                id={`marks-${index}`}
+                value={model.marks}
+                onChange={(ev) =>
+                  setModel({
+                    ...model,
+                    marks: parseInt(ev.target.value), // Convert the value to integer
+                  })
+                }
+                className="w-full px-3 py-1 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
+              />
+            </div>
+          </div>
           <div>
             <label
-              htmlFor="questionType"
-              className="w-40 text-sm font-medium text-gray-700 "
+              htmlFor={`questionType-${index}`}
+              className="w-40 text-sm font-medium text-gray-700"
             >
               Question Type
             </label>
             <select
-              id="questionType"
-              name="questionType"
+              id={`questionType-${index}`}
+              name={`questionType-${index}`}
               value={model.type}
               onChange={onTypeChange}
               className="w-full px-3 py-2 mt-1 bg-white border border-gray-300 rounded-md shadow-sm sm:text-sm"
@@ -159,7 +200,6 @@ export default function QuestionEditor({
               ))}
             </select>
           </div>
-          {/* Question Type */}
         </div>
 
         <div>
@@ -172,11 +212,11 @@ export default function QuestionEditor({
                   type="button"
                   className="flex items-center px-2 py-1 text-xs text-white bg-blue-600 rounded-sm hover:bg-blue-700"
                 >
-                  Add
+                  Add Option
                 </button>
               </h4>
               {model.data.options.length === 0 && (
-                <div className="text-xs text-gray-600 text-center py-3}">
+                <div className="py-3 text-xs text-center text-gray-600">
                   You don't have options defined
                 </div>
               )}
@@ -188,8 +228,10 @@ export default function QuestionEditor({
                       <input
                         type="text"
                         value={op.text ? op.text : ""}
-                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded-md shadow-sm bg-slate-50 "
-                        onInput={(ev) => {
+                        name={`option-${ind}`}
+                        id={`option-${op.uuid}`}
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded-md shadow-sm bg-slate-50"
+                        onChange={(ev) => {
                           op.text = ev.target.value;
                           setModel({ ...model });
                         }}
@@ -208,18 +250,18 @@ export default function QuestionEditor({
             </div>
           )}
         </div>
-        {/* {model.type === "select" && <div></div>} */}
 
-        {/* Correct Answer */}
         {model.type === "text" && (
           <div className="mb-3">
             <h4 className="mt-4 mb-1 text-sm text-gray-700">
-              Select Correct Answer
+              Enter Correct Answer
             </h4>
             <input
               type="text"
+              name={`correctAnswer-${index}`}
+              id={`correctAnswer-${index}`}
               value={model.data.correctAnswer || ""}
-              onChange={(e) => handleCorrectAnswerChange(e)}
+              onChange={(e) => handleCorrectAnswerChange(e, null, index)}
               className="w-full px-2 py-1 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
@@ -241,29 +283,33 @@ export default function QuestionEditor({
                     {model.type === "checkbox" ? (
                       <input
                         type="checkbox"
-                        id={`correct-answer-${ind}`}
                         value={op.text || ""}
-                        checked={model.data.correctAnswer?.includes(op.text)}
-                        onChange={handleCorrectAnswerChange}
+                        name={`correctAnswer-${ind}`}
+                        id={`correctAnswer-${op.uuid}`}
+                        onChange={(e) =>
+                          handleCorrectAnswerChange(e, op, index)
+                        }
                       />
                     ) : (
                       <input
                         type="radio"
-                        id={`correct-answer-${ind}`}
                         value={op.text || ""}
-                        checked={model.data.correctAnswer?.includes(op.text)}
-                        onChange={handleCorrectAnswerChange}
+                        name={`correctAnswer-${index}`}
+                        id={`correctAnswer-${op.uuid}`}
+                        onChange={(e) =>
+                          handleCorrectAnswerChange(e, op, index)
+                        }
                       />
                     )}
-                    <label htmlFor={`correct-answer-${ind}`}>{op.text}</label>
+                    <label htmlFor={`correctAnswer-${op.uuid}`}>
+                      {op.text}
+                    </label>
                   </div>
                 ))}
               </div>
             )}
           </div>
         )}
-
-        {/* Correct Answer */}
       </div>
       <hr />
     </>

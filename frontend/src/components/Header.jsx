@@ -44,6 +44,8 @@ const Header = () => {
               placeholder="Search quizzes..."
               className="bg-transparent w-60 focus:outline-none"
               value={searchTerm}
+              name="searchTerm"
+              id="searchTerm"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <button>
@@ -117,6 +119,8 @@ const Header = () => {
                 placeholder="Search quizzes..."
                 className="w-full p-2 bg-transparent focus:outline-none"
                 value={searchTerm}
+                name="searchTerm"
+                id="searchTerm"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <button>

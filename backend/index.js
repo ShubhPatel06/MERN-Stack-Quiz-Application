@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import errorHandler from "./middleware/errorHandler.js";
 import authRouter from "./routes/authRoutes.js";
+import quizRouter from "./routes/quizRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(cookieParser());
 connectDB(DATABASE_URL);
 
 app.use("/api/auth", authRouter);
+app.use("/api/quiz", quizRouter);
 
 app.use(errorHandler);
 
