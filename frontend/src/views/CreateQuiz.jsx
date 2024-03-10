@@ -41,27 +41,7 @@ const CreateQuiz = () => {
   // Add validation logic to ensure start and end times are within open and close dates
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { opensOn, closesOn, startTime, endTime } = formData;
 
-    // Convert date and time strings to Date objects
-    const opensOnDate = new Date(opensOn);
-    const closesOnDate = new Date(closesOn);
-    const startTimeDate = new Date(`${opensOn}T${startTime}`);
-    const endTimeDate = new Date(`${opensOn}T${endTime}`);
-
-    // Check if start time is before end time
-    if (startTimeDate >= endTimeDate) {
-      setErrMsg("Start time must be before end time.");
-      return;
-    }
-
-    // Check if start time and end time are within open and close dates
-    if (startTimeDate < opensOnDate || endTimeDate > closesOnDate) {
-      setErrMsg("Start time and end time must be within open and close dates.");
-      return;
-    }
-
-    console.log(formData);
     try {
       await addNewQuiz(formData);
       setFormData({

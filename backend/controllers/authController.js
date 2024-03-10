@@ -43,21 +43,30 @@ export const signin = async (req, res, next) => {
 
     const accessToken = jwt.sign(
       {
-        UserInfo: {
+        userInfo: {
           id: validUser._id,
           username: validUser.username,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "120m" }
+      { expiresIn: "10s" }
+    );
+
+    const refreshToken = jwt.sign(
+      {
+        id: validUser._id,
+        username: validUser.username,
+      },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "7d" }
     );
 
     // Create secure cookie with refresh token
-    res.cookie("jwt", accessToken, {
+    res.cookie("jwt", refreshToken, {
       httpOnly: true, //accessible only by web server
       secure: true, //https
       sameSite: "None", //cross-site cookie
-      maxAge: 120 * 60 * 1000, //cookie expiry: set to match access token
+      maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match refresh token
     });
 
     // Send username
@@ -71,6 +80,47 @@ export const signin = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const refresh = (req, res) => {
+  const cookies = req.cookies;
+
+  if (!cookies?.jwt) return res.status(401).json({ message: "Unauthorized" });
+
+  const refreshToken = cookies.jwt;
+
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET,
+    async (err, decoded) => {
+      if (err) return res.status(403).json({ message: "Forbidden" });
+
+      const foundUser = await User.findOne({
+        username: decoded.username,
+      }).exec();
+
+      if (!foundUser) return res.status(401).json({ message: "Unauthorized" });
+
+      const accessToken = jwt.sign(
+        {
+          userInfo: {
+            id: foundUser._id,
+            username: foundUser.username,
+          },
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+      );
+
+      res.json({
+        accessToken,
+        userInfo: {
+          username: foundUser.username,
+          email: foundUser.email,
+        },
+      });
+    }
+  );
 };
 
 export const signout = (req, res, next) => {

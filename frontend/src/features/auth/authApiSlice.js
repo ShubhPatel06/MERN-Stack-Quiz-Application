@@ -17,6 +17,22 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: { ...credentials },
       }),
     }),
+    refresh: builder.mutation({
+      query: () => ({
+        url: "/auth/refresh",
+        method: "GET",
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(data);
+          const { accessToken, userInfo } = data;
+          dispatch(setCredentials({ accessToken, userInfo }));
+        } catch (err) {
+          console.log(err);
+        }
+      },
+    }),
     sendLogout: builder.mutation({
       query: () => ({
         url: "/auth/signout",
@@ -37,5 +53,9 @@ export const authApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useSignupMutation, useLoginMutation, useSendLogoutMutation } =
-  authApiSlice;
+export const {
+  useSignupMutation,
+  useLoginMutation,
+  useSendLogoutMutation,
+  useRefreshMutation,
+} = authApiSlice;

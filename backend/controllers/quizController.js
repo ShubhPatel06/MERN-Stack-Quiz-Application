@@ -14,8 +14,7 @@ export const createQuiz = async (req, res, next) => {
       questions,
     } = req.body;
 
-    // Assuming you're using sessions or JWTs for authentication
-    const createdBy = req.user._id; // Assuming user ID is stored in req.user
+    const createdBy = req.id;
 
     // Create the quiz
     const quiz = new Quiz({
