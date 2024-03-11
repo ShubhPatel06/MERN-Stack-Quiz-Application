@@ -54,15 +54,16 @@ const Header = () => {
           </form>
         )}
         <nav className="items-center hidden gap-4 md:flex">
-          {location.pathname !== "/create-quiz" && (
-            <Link
-              to={"/create-quiz"}
-              className="flex items-center gap-1 px-2 py-1 text-lg font-semibold text-white rounded-md bg-emerald-500 hover:bg-emerald-600"
-            >
-              <FaPlus size={15} />
-              <span className="">Quiz</span>
-            </Link>
-          )}
+          {location.pathname !== "/create-quiz" &&
+            !location.pathname.startsWith("/edit-quiz/") && (
+              <Link
+                to={"/create-quiz"}
+                className="flex items-center gap-1 px-2 py-1 text-lg font-semibold text-white rounded-md bg-emerald-500 hover:bg-emerald-600"
+              >
+                <FaPlus size={15} />
+                <span className="">Quiz</span>
+              </Link>
+            )}
           {location.pathname !== "/home" && (
             <Link
               to={"/home"}
@@ -81,12 +82,14 @@ const Header = () => {
           </button>
           {dropdown && (
             <ul className="absolute overflow-hidden border border-gray-300 rounded-lg shadow-md bg-slate-50 right-4 top-14 min-w-max">
-              <li
-                className="flex items-center gap-3 px-4 py-2 text-gray-800 cursor-pointer hover:bg-slate-100"
-                title="My Quizzes"
-              >
-                <FaList />
-                <span>My Quizzes</span>
+              <li title="My Quizzes">
+                <Link
+                  to="/my-quizzes"
+                  className="flex items-center gap-3 px-4 py-2 text-gray-800 cursor-pointer hover:bg-slate-100"
+                >
+                  <FaList />
+                  <span>My Quizzes</span>
+                </Link>
               </li>
               <li
                 className="flex items-center gap-3 px-4 py-2 text-gray-800 cursor-pointer hover:bg-slate-100"

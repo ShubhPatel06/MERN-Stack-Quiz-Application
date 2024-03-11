@@ -17,6 +17,10 @@ const quizSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  timeLimit: {
+    type: Number,
+    required: true,
+  },
   startTime: {
     type: Date,
   },

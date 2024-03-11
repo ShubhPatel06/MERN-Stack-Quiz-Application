@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import QuizQuestions from "../components/QuizQuestions";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useAddNewQuizMutation } from "../features/quiz/quizApiSlice";
-import { useNavigate } from "react-router-dom";
+import {
+  useAddNewQuizMutation,
+  useGetQuizzesQuery,
+} from "../features/quiz/quizApiSlice";
+import { useNavigate, useParams } from "react-router-dom";
 import PulseLoader from "react-spinners/PulseLoader";
 
 const CreateQuiz = () => {
@@ -10,12 +13,14 @@ const CreateQuiz = () => {
     useAddNewQuizMutation();
 
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     opensOn: "",
     closesOn: "",
+    timeLimit: "",
     startTime: "",
     endTime: "",
     password: "",
@@ -27,7 +32,7 @@ const CreateQuiz = () => {
 
   useEffect(() => {
     if (isSuccess) {
-      navigate("/home");
+      navigate("/my-quizzes");
     }
   }, [isSuccess, navigate]);
 
@@ -49,6 +54,7 @@ const CreateQuiz = () => {
         description: "",
         opensOn: "",
         closesOn: "",
+        timeLimit: "",
         startTime: "",
         endTime: "",
         password: "",
@@ -68,9 +74,57 @@ const CreateQuiz = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toISOString().split("T")[0];
+    return formattedDate;
+  };
+
+  const formatDateTime = (dateTimeString) => {
+    const date = new Date(dateTimeString);
+    const options = {
+      timeZone: "Africa/Nairobi", // Set the time zone to Nairobi, Kenya
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    const formattedDate = date.toLocaleString("en-KE", options);
+    const [datePart, timePart] = formattedDate.split(", ");
+    const [day, month, year] = datePart.split("/");
+    const [hour, minute] = timePart.split(":");
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  };
+
+  const { quiz } = useGetQuizzesQuery("quizList", {
+    selectFromResult: ({ data }) => ({
+      quiz: data?.entities[id],
+    }),
+    skip: !id,
+  });
+
+  useEffect(() => {
+    if (id && quiz) {
+      setFormData({
+        title: quiz.title,
+        description: quiz.description,
+        opensOn: formatDate(quiz.opensOn),
+        closesOn: formatDate(quiz.closesOn),
+        timeLimit: quiz.timeLimit,
+        startTime: formatDateTime(quiz.startTime),
+        endTime: formatDateTime(quiz.endTime),
+        password: quiz.password,
+        questions: quiz.questions,
+      });
+    }
+  }, [id, quiz]);
+
   return (
     <main className="p-3 mx-auto max-w-7xl">
-      <h1 className="my-6 text-3xl font-semibold text-center">Create a Quiz</h1>
+      <h1 className="my-6 text-3xl font-semibold text-center">
+        {!id ? "Create a Quiz" : "Update Quiz"}
+      </h1>
       <form onSubmit={handleSubmit}>
         {/*Title*/}
         <div className="">
@@ -161,6 +215,29 @@ const CreateQuiz = () => {
               }
               min={new Date().toISOString().split("T")[0]}
               placeholder="Closing Date"
+              className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
+            />
+          </div>
+          <div className="flex-1">
+            <label
+              htmlFor="timeLimit"
+              className="text-lg font-medium text-gray-700"
+            >
+              Time Limit <span className="text-xs">(mins)</span>
+            </label>
+            <input
+              type="number"
+              name="timeLimit"
+              id="timeLimit"
+              value={formData.timeLimit}
+              min={1}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  timeLimit: e.target.value,
+                })
+              }
+              placeholder="Time Limit"
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>

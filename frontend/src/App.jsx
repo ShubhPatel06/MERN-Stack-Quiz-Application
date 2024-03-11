@@ -4,6 +4,7 @@ import SignIn from "./views/SignIn";
 import SignUp from "./views/SignUp";
 import Home from "./views/Home";
 import CreateQuiz from "./views/CreateQuiz";
+import MyQuizzes from "./views/MyQuizzes";
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
       <Route element={<Layout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/my-quizzes" element={<MyQuizzes />} />
+        <Route path="/edit-quiz/:id" element={<CreateQuiz />} />
       </Route>
 
       {/* Redirect to login page for unknown routes */}

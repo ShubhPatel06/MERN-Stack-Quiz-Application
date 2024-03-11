@@ -61,7 +61,7 @@ export default function QuestionEditor({
     setModel({ ...model });
   };
 
-  const handleCorrectAnswerChange = (ev, option, questionIndex) => {
+  const handleCorrectAnswerChange = (ev, questionIndex) => {
     const value = ev.target.value;
     const type = model.type;
     const newModel = { ...model };
@@ -169,6 +169,8 @@ export default function QuestionEditor({
                 name={`marks-${index}`}
                 id={`marks-${index}`}
                 value={model.marks}
+                min={1}
+                max={15}
                 onChange={(ev) =>
                   setModel({
                     ...model,
@@ -205,7 +207,7 @@ export default function QuestionEditor({
         <div>
           {shouldHaveOptions() && (
             <div>
-              <h4 className="flex items-center justify-between mb-2 text-sm font-semibold text-gray-700">
+              <label className="flex items-center justify-between mb-2 text-sm font-semibold text-gray-700">
                 Options
                 <button
                   onClick={addOption}
@@ -214,7 +216,7 @@ export default function QuestionEditor({
                 >
                   Add Option
                 </button>
-              </h4>
+              </label>
               {model.data.options.length === 0 && (
                 <div className="py-3 text-xs text-center text-gray-600">
                   You don't have options defined
@@ -229,7 +231,6 @@ export default function QuestionEditor({
                         type="text"
                         value={op.text ? op.text : ""}
                         name={`option-${ind}`}
-                        id={`option-${op.uuid}`}
                         className="w-full px-2 py-1 text-xs border border-gray-300 rounded-md shadow-sm bg-slate-50"
                         onChange={(ev) => {
                           op.text = ev.target.value;
@@ -253,14 +254,14 @@ export default function QuestionEditor({
 
         {model.type === "text" && (
           <div className="mb-3">
-            <h4 className="mt-4 mb-1 text-sm text-gray-700">
+            <label className="mt-4 mb-1 text-sm text-gray-700">
               Enter Correct Answer
-            </h4>
+            </label>
             <input
               type="text"
               name={`correctAnswer-${index}`}
               id={`correctAnswer-${index}`}
-              value={model.data.correctAnswer || ""}
+              value={model.data.correctAnswer}
               onChange={(e) => handleCorrectAnswerChange(e, null, index)}
               className="w-full px-2 py-1 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
@@ -269,9 +270,9 @@ export default function QuestionEditor({
 
         {shouldHaveOptions() && model.type !== "text" && (
           <div className="mb-3">
-            <h4 className="mt-4 mb-2 text-sm font-semibold text-gray-700">
+            <label className="mt-4 mb-2 text-sm font-semibold text-gray-700">
               Select Correct Answer
-            </h4>
+            </label>
             {model.data.options.length === 0 ? (
               <div className="text-gray-600">
                 Add options to select the correct answer
@@ -285,7 +286,6 @@ export default function QuestionEditor({
                         type="checkbox"
                         value={op.text || ""}
                         name={`correctAnswer-${ind}`}
-                        id={`correctAnswer-${op.uuid}`}
                         onChange={(e) =>
                           handleCorrectAnswerChange(e, op, index)
                         }
@@ -295,15 +295,12 @@ export default function QuestionEditor({
                         type="radio"
                         value={op.text || ""}
                         name={`correctAnswer-${index}`}
-                        id={`correctAnswer-${op.uuid}`}
                         onChange={(e) =>
                           handleCorrectAnswerChange(e, op, index)
                         }
                       />
                     )}
-                    <label htmlFor={`correctAnswer-${op.uuid}`}>
-                      {op.text}
-                    </label>
+                    <label>{op.text}</label>
                   </div>
                 ))}
               </div>
