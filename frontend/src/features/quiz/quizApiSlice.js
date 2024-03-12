@@ -11,11 +11,11 @@ const initialState = quizAdapter.getInitialState();
 export const quizApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addNewQuiz: builder.mutation({
-      query: (initialNote) => ({
+      query: (initialQuiz) => ({
         url: "/quiz/create",
         method: "POST",
         body: {
-          ...initialNote,
+          ...initialQuiz,
         },
       }),
       invalidatesTags: [{ type: "Quiz", id: "LIST" }],
@@ -66,6 +66,16 @@ export const quizApiSlice = apiSlice.injectEndpoints({
         } else return [{ type: "Quiz", id: "LIST" }];
       },
     }),
+    updateQuiz: builder.mutation({
+      query: (initialQuiz) => ({
+        url: "/quiz/update",
+        method: "PATCH",
+        body: {
+          ...initialQuiz,
+        },
+      }),
+      invalidatesTags: (result, error, arg) => [{ type: "Quiz", id: arg.id }],
+    }),
   }),
 });
 
@@ -73,6 +83,7 @@ export const {
   useGetQuizzesQuery,
   useAddNewQuizMutation,
   useGetMyCreatedQuizzesQuery,
+  useUpdateQuizMutation,
 } = quizApiSlice;
 
 // returns the query result object
@@ -89,5 +100,5 @@ export const {
   selectAll: selectAllQuizzes,
   selectById: selectQuizById,
   selectIds: selectQuizIds,
-  // Pass in a selector that returns the notes slice of state
+  // Pass in a selector that returns the quiz slice of state
 } = quizAdapter.getSelectors((state) => selectQuizData(state) ?? initialState);

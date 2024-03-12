@@ -4,13 +4,32 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import {
   useAddNewQuizMutation,
   useGetQuizzesQuery,
+  useUpdateQuizMutation,
 } from "../features/quiz/quizApiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import PulseLoader from "react-spinners/PulseLoader";
+import toast, { Toaster } from "react-hot-toast";
 
 const CreateQuiz = () => {
-  const [addNewQuiz, { isLoading, isSuccess, isError, error }] =
-    useAddNewQuizMutation();
+  const [
+    addNewQuiz,
+    {
+      isLoading: isLoadingAdd,
+      isSuccess: isSuccessAdd,
+      isError: isErrorAdd,
+      error: errorAdd,
+    },
+  ] = useAddNewQuizMutation();
+
+  const [
+    updateQuiz,
+    {
+      isLoading: isLoadingUpdate,
+      isSuccess: isSuccessUpdate,
+      isError: isErrorUpdate,
+      error: errorUpdate,
+    },
+  ] = useUpdateQuizMutation();
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -28,13 +47,29 @@ const CreateQuiz = () => {
   });
 
   const [errMsg, setErrMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const notifyCreated = () =>
+    toast.success("Quiz Created. Redirecting to your quizzes");
+  const notifyUpdated = () =>
+    toast.success("Quiz Updated. Redirecting to your quizzes");
 
   useEffect(() => {
-    if (isSuccess) {
-      navigate("/my-quizzes");
+    if (isSuccessAdd) {
+      notifyCreated();
+
+      setTimeout(() => {
+        navigate("/my-quizzes");
+      }, 2500);
     }
-  }, [isSuccess, navigate]);
+
+    if (isSuccessUpdate) {
+      notifyUpdated();
+      setTimeout(() => {
+        navigate("/my-quizzes");
+      }, 2500);
+    }
+  }, [isSuccessAdd, isSuccessUpdate, navigate]);
 
   const onQuestionsUpdate = (questions) => {
     setFormData({
@@ -43,24 +78,33 @@ const CreateQuiz = () => {
     });
   };
 
-  // Add validation logic to ensure start and end times are within open and close dates
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await addNewQuiz(formData);
-      setFormData({
-        title: "",
-        description: "",
-        opensOn: "",
-        closesOn: "",
-        timeLimit: "",
-        startTime: "",
-        endTime: "",
-        password: "",
-        questions: [],
-      });
+      if (id) {
+        // If ID exists, it means we're updating the quiz
+        const updatedFormData = { ...formData, id }; // Include the id in the formData
+        await updateQuiz(updatedFormData);
+      } else {
+        // Otherwise, it's a new quiz creation
+        await addNewQuiz(formData);
+
+        setFormData({
+          // Reset the form data after submission
+          title: "",
+          description: "",
+          opensOn: "",
+          closesOn: "",
+          timeLimit: "",
+          startTime: "",
+          endTime: "",
+          password: "",
+          questions: [],
+        });
+      }
     } catch (err) {
+      // Handle errors
       if (!err.status) {
         setErrMsg("No Server Response");
       } else if (err.status === 400) {
@@ -106,6 +150,7 @@ const CreateQuiz = () => {
 
   useEffect(() => {
     if (id && quiz) {
+      console.log(quiz);
       setFormData({
         title: quiz.title,
         description: quiz.description,
@@ -122,6 +167,7 @@ const CreateQuiz = () => {
 
   return (
     <main className="p-3 mx-auto max-w-7xl">
+      <Toaster />
       <h1 className="my-6 text-3xl font-semibold text-center">
         {!id ? "Create a Quiz" : "Update Quiz"}
       </h1>
@@ -334,14 +380,24 @@ const CreateQuiz = () => {
             className="px-4 py-2 font-semibold text-white rounded-md bg-emerald-500 hover:bg-emerald-600 sm:px-6"
             type="submit"
           >
-            {isLoading ? <PulseLoader color={"#FFF"} /> : "Save"}
+            {isLoadingAdd || isLoadingUpdate ? (
+              <PulseLoader color={"#FFF"} />
+            ) : (
+              "Save"
+            )}
           </button>
         </div>
       </form>
-      <p className="p-1 mb-2 text-red-600">{errMsg}</p>
-      <p className="p-1 mb-2 text-center text-red-600">
-        {error?.data?.message}
-      </p>
+      {isSuccessUpdate && (
+        <p className="p-1 mb-2 text-center text-emerald-600">{successMsg}</p>
+      )}
+      <p className="p-1 mb-2 text-center text-red-600">{errMsg}</p>
+      {isErrorAdd ||
+        (isErrorUpdate && (
+          <p className="p-1 mb-2 text-center text-red-600">
+            {errorAdd?.data?.message || errorUpdate?.data?.message}
+          </p>
+        ))}
     </main>
   );
 };

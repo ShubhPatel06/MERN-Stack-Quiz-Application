@@ -13,7 +13,7 @@ const QuizQuestions = ({ questions, onQuestionsUpdate }) => {
       type: "text",
       question: "",
       marks: "",
-      data: {},
+      data: { correctAnswer: [] },
     });
     setMyQuestions([...myQuestions]);
     onQuestionsUpdate(myQuestions);

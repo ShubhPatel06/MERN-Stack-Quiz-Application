@@ -98,10 +98,12 @@ export default function QuestionEditor({
       }
     }
     setModel(newModel);
+    // questionChange(newModel);
   };
 
   useEffect(() => {
     questionChange(model);
+    // console.log(model);
   }, [model]);
 
   const upperCaseFirst = (str) => {
@@ -261,8 +263,8 @@ export default function QuestionEditor({
               type="text"
               name={`correctAnswer-${index}`}
               id={`correctAnswer-${index}`}
-              value={model.data.correctAnswer}
-              onChange={(e) => handleCorrectAnswerChange(e, null, index)}
+              value={model.data.correctAnswer[0]}
+              onChange={(e) => handleCorrectAnswerChange(e, index)}
               className="w-full px-2 py-1 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
@@ -284,20 +286,24 @@ export default function QuestionEditor({
                     {model.type === "checkbox" ? (
                       <input
                         type="checkbox"
-                        value={op.text || ""}
+                        value={op.text ? op.text : ""}
                         name={`correctAnswer-${ind}`}
-                        onChange={(e) =>
-                          handleCorrectAnswerChange(e, op, index)
+                        checked={
+                          model.data.correctAnswer &&
+                          model.data.correctAnswer.includes(op.text)
                         }
+                        onChange={(e) => handleCorrectAnswerChange(e, index)}
                       />
                     ) : (
                       <input
                         type="radio"
-                        value={op.text || ""}
+                        value={op.text ? op.text : ""}
                         name={`correctAnswer-${index}`}
-                        onChange={(e) =>
-                          handleCorrectAnswerChange(e, op, index)
+                        checked={
+                          model.data.correctAnswer &&
+                          model.data.correctAnswer.includes(op.text)
                         }
+                        onChange={(e) => handleCorrectAnswerChange(e, index)}
                       />
                     )}
                     <label>{op.text}</label>
