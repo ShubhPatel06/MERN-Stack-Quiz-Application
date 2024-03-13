@@ -131,7 +131,7 @@ export const updateQuiz = async (req, res, next) => {
     ) {
       return res.status(400).json({
         message:
-          "Title, Description, Opens On, Closes On, Time Limit and Questions fields are required",
+          "Title, Description, Opens On, Closes On, Time Limit, and Questions fields are required",
       });
     }
 
@@ -164,15 +164,13 @@ export const updateQuiz = async (req, res, next) => {
     // Update quiz details
     Object.assign(quiz, updatedQuizData);
 
-    // Save the updated quiz
-    await quiz.save();
-
-    // Update questions associated with the quiz
+    // Update or create questions associated with the quiz
     const updatedQuestionIds = [];
+    const processedQuestions = new Set(); // Use a Set to keep track of processed question IDs
     for (const q of questions) {
       let question;
       if (q._id) {
-        // If question already exists, find it by ID
+        // If question already exists, find it by ID and update it
         question = await Question.findById(q._id);
         if (!question) {
           // Handle case where question with given ID is not found
@@ -183,19 +181,38 @@ export const updateQuiz = async (req, res, next) => {
         question.question = q.question;
         question.marks = q.marks;
         question.data = q.data;
+        // Save the updated question
+        await question.save();
+        // Push the question ID only if it hasn't been processed before
+        if (!processedQuestions.has(q._id.toString())) {
+          updatedQuestionIds.push(q._id);
+          processedQuestions.add(q._id.toString()); // Add the processed question ID to the Set
+        }
       } else {
-        // If question is new, create it
+        // If question is new, create it and push its ID to the quiz
         question = new Question({
           type: q.type,
           question: q.question,
           marks: q.marks,
           data: q.data,
         });
+        // Save the question to get its ID
+        await question.save();
+        // Push the new question ID only if it hasn't been processed before
+        if (!processedQuestions.has(question._id.toString())) {
+          updatedQuestionIds.push(question._id);
+          processedQuestions.add(question._id.toString()); // Add the processed question ID to the Set
+        }
       }
-      // Save the question to get its ID and push it to the array
-      await question.save();
-      updatedQuestionIds.push(question._id);
     }
+
+    // Merge existing question IDs into updatedQuestionIds
+    quiz.questions.forEach((q) => {
+      if (!processedQuestions.has(q.toString())) {
+        updatedQuestionIds.push(q);
+        processedQuestions.add(q.toString());
+      }
+    });
 
     // Update the quiz with the updated question references
     quiz.questions = updatedQuestionIds;
