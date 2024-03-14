@@ -33,21 +33,66 @@ export default function QuestionEditor({
     setModel(newModel);
   };
 
+  // const addOption = () => {
+  //   model.data.options.push({
+  //     uuid: uuidv4(),
+  //     text: "",
+  //   });
+  //   setModel({ ...model });
+  // };
+
   const addOption = () => {
-    model.data.options.push({
+    // Create a new option object with a unique UUID
+    const newOption = {
       uuid: uuidv4(),
       text: "",
-    });
-    setModel({ ...model });
+    };
+
+    // Create a new array by concatenating the existing options array with the new option
+    const newOptions = [...model.data.options, newOption];
+
+    // Update the model with the new options
+    const newModel = {
+      ...model,
+      data: {
+        ...model.data,
+        options: newOptions,
+      },
+    };
+
+    // Set the updated model
+    setModel(newModel);
   };
 
+  // const deleteOption = (op) => {
+  //   // Check if the deleted option was selected as a correct answer
+  //   const wasCorrectAnswer =
+  //     model.data.correctAnswer && model.data.correctAnswer.includes(op.text);
+
+  //   // Remove the option
+  //   model.data.options = model.data.options.filter(
+  //     (option) => option.uuid !== op.uuid
+  //   );
+
+  //   // If the deleted option was selected as a correct answer, remove it from the correctAnswer array
+  //   if (wasCorrectAnswer) {
+  //     model.data.correctAnswer = model.data.correctAnswer.filter(
+  //       (item) => item !== op.text
+  //     );
+  //   }
+
+  //   setModel({ ...model });
+  // };
+
   const deleteOption = (op) => {
+    console.log("Deleting option with uuid:", op.uuid);
+
     // Check if the deleted option was selected as a correct answer
     const wasCorrectAnswer =
       model.data.correctAnswer && model.data.correctAnswer.includes(op.text);
 
     // Remove the option
-    model.data.options = model.data.options.filter(
+    const newOptions = model.data.options.filter(
       (option) => option.uuid !== op.uuid
     );
 
@@ -58,22 +103,80 @@ export default function QuestionEditor({
       );
     }
 
-    setModel({ ...model });
+    // Update the model with the new options
+    const newModel = {
+      ...model,
+      data: {
+        ...model.data,
+        options: newOptions,
+      },
+    };
+
+    setModel(newModel);
   };
+
+  // const handleCorrectAnswerChange = (ev, questionIndex) => {
+  //   const value = ev.target.value;
+  //   const type = model.type;
+  //   const newModel = { ...model };
+
+  //   if (questionIndex !== index) {
+  //     return; // Ignore changes for other questions
+  //   }
+
+  //   if (!newModel.data.correctAnswer) {
+  //     newModel.data.correctAnswer = [];
+  //   }
+
+  //   if (type === "text") {
+  //     newModel.data.correctAnswer = [value];
+  //   } else {
+  //     if (ev.target.checked) {
+  //       if (type === "checkbox") {
+  //         // For checkbox type, add the value if it's not already present
+  //         if (!newModel.data.correctAnswer.includes(value)) {
+  //           newModel.data.correctAnswer.push(value);
+  //         }
+  //       } else {
+  //         // For radio buttons, only the selected value should be added
+  //         newModel.data.correctAnswer = [value];
+  //       }
+  //     } else {
+  //       if (type === "checkbox") {
+  //         // For checkbox type, remove the value if it's present
+  //         newModel.data.correctAnswer = newModel.data.correctAnswer.filter(
+  //           (item) => item !== value
+  //         );
+  //       }
+  //       // For radio buttons, unchecking is not applicable, so no action is needed here
+  //     }
+  //   }
+  //   setModel(newModel);
+  //   // questionChange(newModel);
+  // };
 
   const handleCorrectAnswerChange = (ev, questionIndex) => {
     const value = ev.target.value;
     const type = model.type;
-    const newModel = { ...model };
 
-    if (questionIndex !== index) {
-      return; // Ignore changes for other questions
-    }
+    // Create a copy of the model and its data object
+    const newModel = {
+      ...model,
+      data: {
+        ...model.data,
+        // correctAnswer: [...model.data.correctAnswer], // Create a shallow copy of correctAnswer array
+      },
+    };
 
     if (!newModel.data.correctAnswer) {
       newModel.data.correctAnswer = [];
     }
 
+    if (questionIndex !== index) {
+      return; // Ignore changes for other questions
+    }
+
+    // Update correctAnswer based on question type
     if (type === "text") {
       newModel.data.correctAnswer = [value];
     } else {
@@ -97,8 +200,9 @@ export default function QuestionEditor({
         // For radio buttons, unchecking is not applicable, so no action is needed here
       }
     }
+
+    // Update the state with the new model
     setModel(newModel);
-    // questionChange(newModel);
   };
 
   useEffect(() => {

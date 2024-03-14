@@ -16,6 +16,10 @@ const questionSchema = new mongoose.Schema({
   data: {
     options: [
       {
+        uuid: {
+          type: String,
+          required: true,
+        },
         text: String,
       },
     ],
