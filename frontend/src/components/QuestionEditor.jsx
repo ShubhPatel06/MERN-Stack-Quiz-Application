@@ -19,9 +19,45 @@ export default function QuestionEditor({
   };
 
   const onTypeChange = (ev) => {
+    // const newModel = {
+    //   ...model,
+    //   type: ev.target.value,
+    // };
+    // if (!shouldHaveOptions(model.type) && shouldHaveOptions(ev.target.value)) {
+    //   if (!model.data.options) {
+    //     newModel.data = {
+    //       options: [{ uuid: uuidv4(), text: "" }],
+    //     };
+    //   }
+    // }
+    // setModel(newModel);
+
+    // const newModel = {
+    //   ...model,
+    //   type: ev.target.value,
+    //   // Reset correctAnswer when the question type changes
+    //   data: {
+    //     ...model.data,
+    //     correctAnswer: [],
+    //   },
+    // };
+    // if (!shouldHaveOptions(model.type) && shouldHaveOptions(ev.target.value)) {
+    //   if (!model.data.options) {
+    //     newModel.data = {
+    //       options: [{ uuid: uuidv4(), text: "" }],
+    //     };
+    //   }
+    // }
+    // setModel(newModel);
+
     const newModel = {
       ...model,
       type: ev.target.value,
+      // Reset options and correctAnswer when the question type changes
+      data: {
+        options: [], // Empty options array
+        correctAnswer: [],
+      },
     };
     if (!shouldHaveOptions(model.type) && shouldHaveOptions(ev.target.value)) {
       if (!model.data.options) {
@@ -32,14 +68,6 @@ export default function QuestionEditor({
     }
     setModel(newModel);
   };
-
-  // const addOption = () => {
-  //   model.data.options.push({
-  //     uuid: uuidv4(),
-  //     text: "",
-  //   });
-  //   setModel({ ...model });
-  // };
 
   const addOption = () => {
     // Create a new option object with a unique UUID
@@ -64,29 +92,7 @@ export default function QuestionEditor({
     setModel(newModel);
   };
 
-  // const deleteOption = (op) => {
-  //   // Check if the deleted option was selected as a correct answer
-  //   const wasCorrectAnswer =
-  //     model.data.correctAnswer && model.data.correctAnswer.includes(op.text);
-
-  //   // Remove the option
-  //   model.data.options = model.data.options.filter(
-  //     (option) => option.uuid !== op.uuid
-  //   );
-
-  //   // If the deleted option was selected as a correct answer, remove it from the correctAnswer array
-  //   if (wasCorrectAnswer) {
-  //     model.data.correctAnswer = model.data.correctAnswer.filter(
-  //       (item) => item !== op.text
-  //     );
-  //   }
-
-  //   setModel({ ...model });
-  // };
-
   const deleteOption = (op) => {
-    console.log("Deleting option with uuid:", op.uuid);
-
     // Check if the deleted option was selected as a correct answer
     const wasCorrectAnswer =
       model.data.correctAnswer && model.data.correctAnswer.includes(op.text);
@@ -115,46 +121,6 @@ export default function QuestionEditor({
     setModel(newModel);
   };
 
-  // const handleCorrectAnswerChange = (ev, questionIndex) => {
-  //   const value = ev.target.value;
-  //   const type = model.type;
-  //   const newModel = { ...model };
-
-  //   if (questionIndex !== index) {
-  //     return; // Ignore changes for other questions
-  //   }
-
-  //   if (!newModel.data.correctAnswer) {
-  //     newModel.data.correctAnswer = [];
-  //   }
-
-  //   if (type === "text") {
-  //     newModel.data.correctAnswer = [value];
-  //   } else {
-  //     if (ev.target.checked) {
-  //       if (type === "checkbox") {
-  //         // For checkbox type, add the value if it's not already present
-  //         if (!newModel.data.correctAnswer.includes(value)) {
-  //           newModel.data.correctAnswer.push(value);
-  //         }
-  //       } else {
-  //         // For radio buttons, only the selected value should be added
-  //         newModel.data.correctAnswer = [value];
-  //       }
-  //     } else {
-  //       if (type === "checkbox") {
-  //         // For checkbox type, remove the value if it's present
-  //         newModel.data.correctAnswer = newModel.data.correctAnswer.filter(
-  //           (item) => item !== value
-  //         );
-  //       }
-  //       // For radio buttons, unchecking is not applicable, so no action is needed here
-  //     }
-  //   }
-  //   setModel(newModel);
-  //   // questionChange(newModel);
-  // };
-
   const handleCorrectAnswerChange = (ev, questionIndex) => {
     const value = ev.target.value;
     const type = model.type;
@@ -164,7 +130,10 @@ export default function QuestionEditor({
       ...model,
       data: {
         ...model.data,
-        // correctAnswer: [...model.data.correctAnswer], // Create a shallow copy of correctAnswer array
+        // correctAnswer: [...model.data.correctAnswer],
+        correctAnswer: Array.isArray(model.data.correctAnswer)
+          ? [...model.data.correctAnswer]
+          : [],
       },
     };
 
@@ -367,7 +336,9 @@ export default function QuestionEditor({
               type="text"
               name={`correctAnswer-${index}`}
               id={`correctAnswer-${index}`}
-              value={model.data.correctAnswer[0]}
+              value={
+                model.data.correctAnswer ? model.data.correctAnswer[0] : ""
+              }
               onChange={(e) => handleCorrectAnswerChange(e, index)}
               className="w-full px-2 py-1 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />

@@ -31,13 +31,6 @@ const QuizQuestions = ({ questions, onQuestionsUpdate }) => {
     onQuestionsUpdate(newQuestions);
   };
 
-  // const deleteQuestion = (question) => {
-  //   const newQuestions = myQuestions.filter((q) => q.id !== question.id);
-
-  //   setMyQuestions(newQuestions);
-  //   onQuestionsUpdate(newQuestions);
-  // };
-
   const deleteQuestion = (question) => {
     const newQuestions = myQuestions.filter((q) => q.id !== question.id);
     setMyQuestions(newQuestions);

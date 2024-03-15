@@ -82,41 +82,41 @@ const CreateQuiz = () => {
     e.preventDefault();
     console.log(formData);
 
-    // try {
-    //   if (id) {
-    //     // If ID exists, it means we're updating the quiz
-    //     const updatedFormData = { ...formData, id }; // Include the id in the formData
-    //     await updateQuiz(updatedFormData);
-    //   } else {
-    //     // Otherwise, it's a new quiz creation
-    //     await addNewQuiz(formData);
+    try {
+      if (id) {
+        // If ID exists, it means we're updating the quiz
+        const updatedFormData = { ...formData, id }; // Include the id in the formData
+        await updateQuiz(updatedFormData);
+      } else {
+        // Otherwise, it's a new quiz creation
+        await addNewQuiz(formData);
 
-    //     setFormData({
-    //       // Reset the form data after submission
-    //       title: "",
-    //       description: "",
-    //       opensOn: "",
-    //       closesOn: "",
-    //       timeLimit: "",
-    //       startTime: "",
-    //       endTime: "",
-    //       password: "",
-    //       questions: [],
-    //     });
-    //   }
-    // } catch (err) {
-    //   // Handle errors
-    //   if (!err.status) {
-    //     setErrMsg("No Server Response");
-    //   } else if (err.status === 400) {
-    //     setErrMsg(err.data.message);
-    //   } else if (err.status === 401) {
-    //     setErrMsg(err.data.message);
-    //   } else {
-    //     setErrMsg(err.data.message);
-    //   }
-    //   errRef.current.focus();
-    // }
+        setFormData({
+          // Reset the form data after submission
+          title: "",
+          description: "",
+          opensOn: "",
+          closesOn: "",
+          timeLimit: "",
+          startTime: "",
+          endTime: "",
+          password: "",
+          questions: [],
+        });
+      }
+    } catch (err) {
+      // Handle errors
+      if (!err.status) {
+        setErrMsg("No Server Response");
+      } else if (err.status === 400) {
+        setErrMsg(err.data.message);
+      } else if (err.status === 401) {
+        setErrMsg(err.data.message);
+      } else {
+        setErrMsg(err.data.message);
+      }
+      errRef.current.focus();
+    }
   };
 
   const formatDate = (dateString) => {
@@ -151,7 +151,12 @@ const CreateQuiz = () => {
 
   useEffect(() => {
     if (id && quiz) {
-      console.log(quiz);
+      // console.log(quiz.questions);
+      const updatedQuestions = quiz.questions.map((question) => {
+        const { _id, ...rest } = question;
+        return { id: _id, ...rest };
+      });
+
       setFormData({
         title: quiz.title,
         description: quiz.description,
@@ -161,7 +166,7 @@ const CreateQuiz = () => {
         startTime: formatDateTime(quiz.startTime),
         endTime: formatDateTime(quiz.endTime),
         password: quiz.password,
-        questions: quiz.questions,
+        questions: updatedQuestions,
       });
     }
   }, [id, quiz]);
