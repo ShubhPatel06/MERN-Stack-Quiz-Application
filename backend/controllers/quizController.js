@@ -216,6 +216,21 @@ export const updateQuiz = async (req, res, next) => {
       }
     });
 
+    // Identify questions to delete
+    const questionsToDelete = quiz.questions.filter(
+      (q) => !updatedQuestionIds.includes(q.toString())
+    );
+
+    for (const q of questionsToDelete) {
+      await Question.findByIdAndDelete(q);
+
+      // Remove the deleted question from updatedQuestionIds
+      const index = updatedQuestionIds.indexOf(q);
+      if (index !== -1) {
+        updatedQuestionIds.splice(index, 1);
+      }
+    }
+
     // Update the quiz with the updated question references
     quiz.questions = updatedQuestionIds;
     await quiz.save();

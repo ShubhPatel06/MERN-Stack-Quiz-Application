@@ -19,37 +19,6 @@ export default function QuestionEditor({
   };
 
   const onTypeChange = (ev) => {
-    // const newModel = {
-    //   ...model,
-    //   type: ev.target.value,
-    // };
-    // if (!shouldHaveOptions(model.type) && shouldHaveOptions(ev.target.value)) {
-    //   if (!model.data.options) {
-    //     newModel.data = {
-    //       options: [{ uuid: uuidv4(), text: "" }],
-    //     };
-    //   }
-    // }
-    // setModel(newModel);
-
-    // const newModel = {
-    //   ...model,
-    //   type: ev.target.value,
-    //   // Reset correctAnswer when the question type changes
-    //   data: {
-    //     ...model.data,
-    //     correctAnswer: [],
-    //   },
-    // };
-    // if (!shouldHaveOptions(model.type) && shouldHaveOptions(ev.target.value)) {
-    //   if (!model.data.options) {
-    //     newModel.data = {
-    //       options: [{ uuid: uuidv4(), text: "" }],
-    //     };
-    //   }
-    // }
-    // setModel(newModel);
-
     const newModel = {
       ...model,
       type: ev.target.value,
@@ -176,7 +145,6 @@ export default function QuestionEditor({
 
   useEffect(() => {
     questionChange(model);
-    // console.log(model);
   }, [model]);
 
   const upperCaseFirst = (str) => {
