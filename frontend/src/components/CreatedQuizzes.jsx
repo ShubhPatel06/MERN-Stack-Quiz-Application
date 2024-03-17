@@ -58,13 +58,13 @@ const CreatedQuizzes = () => {
                       Opens on:
                       <span className="text-emerald-600">
                         {" "}
-                        {new Date(quiz.startTime).toLocaleString()}
+                        {new Date(quiz.opensOn).toLocaleString()}
                       </span>
                     </p>
                     <p className="my-1">
                       Closes on:{" "}
                       <span className="text-red-600">
-                        {new Date(quiz.endTime).toLocaleString()}
+                        {new Date(quiz.closesOn).toLocaleString()}
                       </span>
                     </p>
                   </div>

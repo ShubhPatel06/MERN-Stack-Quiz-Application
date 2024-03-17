@@ -40,8 +40,6 @@ const CreateQuiz = () => {
     opensOn: "",
     closesOn: "",
     timeLimit: "",
-    startTime: "",
-    endTime: "",
     password: "",
     questions: [],
   });
@@ -80,7 +78,7 @@ const CreateQuiz = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log(formData);
+    console.log(formData);
 
     try {
       if (id) {
@@ -98,8 +96,6 @@ const CreateQuiz = () => {
           opensOn: "",
           closesOn: "",
           timeLimit: "",
-          startTime: "",
-          endTime: "",
           password: "",
           questions: [],
         });
@@ -117,12 +113,6 @@ const CreateQuiz = () => {
       }
       errRef.current.focus();
     }
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const formattedDate = date.toISOString().split("T")[0];
-    return formattedDate;
   };
 
   const formatDateTime = (dateTimeString) => {
@@ -160,12 +150,9 @@ const CreateQuiz = () => {
       setFormData({
         title: quiz.title,
         description: quiz.description,
-        opensOn: formatDate(quiz.opensOn),
-        closesOn: formatDate(quiz.closesOn),
+        opensOn: formatDateTime(quiz.opensOn),
+        closesOn: formatDateTime(quiz.closesOn),
         timeLimit: quiz.timeLimit,
-        startTime: formatDateTime(quiz.startTime),
-        endTime: formatDateTime(quiz.endTime),
-        password: quiz.password,
         questions: updatedQuestions,
       });
     }
@@ -225,23 +212,22 @@ const CreateQuiz = () => {
           {/* Opens On */}
           <div className="flex-1">
             <label
-              htmlFor="opensOn"
+              htmlFor="startTime"
               className="text-lg font-medium text-gray-700"
             >
               Opens On
             </label>
             <input
-              type="date"
-              name="opensOn"
-              id="opensOn"
+              type="datetime-local"
+              name={`startTime`}
+              id={`startTime`}
               value={formData.opensOn}
-              onChange={(e) =>
+              onChange={(ev) =>
                 setFormData({
                   ...formData,
-                  opensOn: e.target.value,
+                  opensOn: ev.target.value,
                 })
               }
-              placeholder="Opening Date"
               min={new Date().toISOString().split("T")[0]}
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
@@ -249,24 +235,23 @@ const CreateQuiz = () => {
           {/* Closes On */}
           <div className="flex-1">
             <label
-              htmlFor="closesOn"
+              htmlFor="endTime"
               className="text-lg font-medium text-gray-700"
             >
-              Closes On
+              Closes on
             </label>
             <input
-              type="date"
-              name="closesOn"
-              id="closesOn"
+              type="datetime-local"
+              name={`endTime`}
+              id={`endTime`}
               value={formData.closesOn}
-              onChange={(e) =>
+              onChange={(ev) =>
                 setFormData({
                   ...formData,
-                  closesOn: e.target.value,
+                  closesOn: ev.target.value,
                 })
               }
               min={new Date().toISOString().split("T")[0]}
-              placeholder="Closing Date"
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
@@ -294,85 +279,35 @@ const CreateQuiz = () => {
             />
           </div>
         </div>
-        <div className="flex flex-col w-full gap-3 mt-3 sm:flex-row">
-          {/* Start Time */}
-          <div className="flex-1">
+        {/* Password */}
+        <div className="mt-2">
+          <div className="relative">
             <label
-              htmlFor="startTime"
+              htmlFor="password"
               className="text-lg font-medium text-gray-700"
             >
-              Start Time <span className="text-xs">(optional)</span>
+              Password <span className="text-xs">(optional)</span>
             </label>
             <input
-              type="datetime-local"
-              name={`startTime`}
-              id={`startTime`}
-              value={formData.startTime}
-              onChange={(ev) =>
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
+              id="password"
+              // value={formData.password}
+              onChange={(e) =>
                 setFormData({
                   ...formData,
-                  startTime: ev.target.value,
+                  password: e.target.value,
                 })
               }
-              min={formData.opensOn ? `${formData.opensOn}T00:00` : ""}
-              max={formData.closesOn ? `${formData.closesOn}T23:59` : ""}
-              className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
-          </div>
-          {/* End Time */}
-          <div className="flex-1">
-            <label
-              htmlFor="endTime"
-              className="text-lg font-medium text-gray-700"
+            <button
+              type="button"
+              className="absolute text-gray-400 transform -translate-y-1/2 top-2/3 right-2 focus:outline-none"
+              onClick={() => setShowPassword(!showPassword)}
             >
-              End Time <span className="text-xs">(optional)</span>
-            </label>
-            <input
-              type="datetime-local"
-              name={`endTime`}
-              id={`endTime`}
-              value={formData.endTime}
-              onChange={(ev) =>
-                setFormData({
-                  ...formData,
-                  endTime: ev.target.value,
-                })
-              }
-              min={formData.opensOn ? `${formData.opensOn}T00:00` : ""}
-              max={formData.closesOn ? `${formData.closesOn}T23:59` : ""}
-              className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
-            />
-          </div>
-          {/* Password */}
-          <div className="flex-1">
-            <div className="relative">
-              <label
-                htmlFor="password"
-                className="text-lg font-medium text-gray-700"
-              >
-                Password <span className="text-xs">(optional)</span>
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
-                id="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    password: e.target.value,
-                  })
-                }
-              />
-              <button
-                type="button"
-                className="absolute text-gray-400 transform -translate-y-1/2 top-2/3 right-2 focus:outline-none"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
         </div>
         <div className="mt-3">

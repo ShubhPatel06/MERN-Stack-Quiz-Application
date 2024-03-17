@@ -21,12 +21,6 @@ const quizSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  startTime: {
-    type: Date,
-  },
-  endTime: {
-    type: Date,
-  },
   password: {
     type: String,
   },
