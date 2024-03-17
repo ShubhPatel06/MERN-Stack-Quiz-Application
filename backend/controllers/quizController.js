@@ -1,6 +1,7 @@
 import Quiz from "../models/quizModel.js";
 import Question from "../models/questionModel.js";
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 export const getAllQuizzes = async (req, res) => {
   try {
@@ -44,8 +45,6 @@ export const createQuiz = async (req, res, next) => {
       opensOn,
       closesOn,
       timeLimit,
-      startTime,
-      endTime,
       password,
       questions,
     } = req.body;
@@ -66,6 +65,9 @@ export const createQuiz = async (req, res, next) => {
       });
     }
 
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Create the quiz
     const quiz = new Quiz({
       title,
@@ -73,9 +75,7 @@ export const createQuiz = async (req, res, next) => {
       opensOn,
       closesOn,
       timeLimit,
-      startTime,
-      endTime,
-      password,
+      password: hashedPassword,
       createdBy,
     });
 
@@ -114,8 +114,6 @@ export const updateQuiz = async (req, res, next) => {
       opensOn,
       closesOn,
       timeLimit,
-      startTime,
-      endTime,
       password,
       questions,
     } = req.body;
@@ -136,15 +134,19 @@ export const updateQuiz = async (req, res, next) => {
       });
     }
 
+    // Hash the password if it's provided
+    let hashedPassword;
+    if (password !== "") {
+      hashedPassword = await bcrypt.hash(password, 10); // You can adjust the salt rounds
+    }
+
     const updatedQuizData = {
       title,
       description,
       opensOn,
       closesOn,
       timeLimit,
-      startTime,
-      endTime,
-      password,
+      password: hashedPassword,
     };
 
     // Find the quiz by ID
