@@ -107,16 +107,8 @@ export const createQuiz = async (req, res, next) => {
 
 export const updateQuiz = async (req, res, next) => {
   try {
-    const {
-      id,
-      title,
-      description,
-      opensOn,
-      closesOn,
-      timeLimit,
-      password,
-      questions,
-    } = req.body;
+    const { id, title, description, opensOn, closesOn, timeLimit, questions } =
+      req.body;
 
     const createdBy = req.id;
 
@@ -134,21 +126,6 @@ export const updateQuiz = async (req, res, next) => {
       });
     }
 
-    // Hash the password if it's provided
-    let hashedPassword;
-    if (password !== "") {
-      hashedPassword = await bcrypt.hash(password, 10); // You can adjust the salt rounds
-    }
-
-    const updatedQuizData = {
-      title,
-      description,
-      opensOn,
-      closesOn,
-      timeLimit,
-      password: hashedPassword,
-    };
-
     // Find the quiz by ID
     const quiz = await Quiz.findById(id).exec();
 
@@ -163,6 +140,23 @@ export const updateQuiz = async (req, res, next) => {
         message: "Forbidden. You are not authorized to update this quiz.",
       });
     }
+
+    // Hash the password if it's provided
+    let hashedPassword = quiz.password;
+    if (req.body.password) {
+      hashedPassword = await bcrypt.hash(req.body.password, 10);
+    } else {
+      hashedPassword = quiz.password;
+    }
+
+    const updatedQuizData = {
+      title,
+      description,
+      opensOn,
+      closesOn,
+      timeLimit,
+      password: hashedPassword,
+    };
 
     // Update quiz details
     Object.assign(quiz, updatedQuizData);

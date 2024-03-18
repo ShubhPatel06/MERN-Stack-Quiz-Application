@@ -23,9 +23,6 @@ const CreatedQuizzes = () => {
         <PulseLoader color={"#FFF"} />
       ) : (
         <>
-          {isError && (
-            <p className="p-1 mb-2 text-red-600">{error?.data?.message}</p>
-          )}
           {isSuccess && (
             <div className="mt-4">
               {Object.values(quizzes.entities).map((quiz) => (
@@ -71,6 +68,9 @@ const CreatedQuizzes = () => {
                 </div>
               ))}
             </div>
+          )}
+          {isError && (
+            <p className="p-1 mb-2 text-red-600">{error?.data?.message}</p>
           )}
         </>
       )}

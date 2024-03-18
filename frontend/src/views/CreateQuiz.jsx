@@ -228,7 +228,7 @@ const CreateQuiz = () => {
                   opensOn: ev.target.value,
                 })
               }
-              min={new Date().toISOString().split("T")[0]}
+              min={new Date().toISOString().slice(0, 16)}
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
@@ -251,7 +251,7 @@ const CreateQuiz = () => {
                   closesOn: ev.target.value,
                 })
               }
-              min={new Date().toISOString().split("T")[0]}
+              min={new Date().toISOString().slice(0, 16)}
               className="w-full p-3 mt-1 border border-gray-300 rounded-md shadow-sm bg-slate-50"
             />
           </div>
